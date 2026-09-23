@@ -4,11 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Game Release Planner</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CSS 位于仓库根目录 -->
 <link rel="stylesheet" href="app.css">
 </head>
+
 <body>
 <div class="wrap">
 
@@ -18,12 +22,15 @@
         <div class="brand-mark">GR</div>
         <h1>Game Release Planner</h1>
       </div>
-      <p class="sub">游戏内容排期与 AIGC 资产管理工具 </p>
+      <p class="sub">游戏内容排期与 AIGC 资产管理工具</p>
     </div>
+
     <div class="header-actions">
       <span class="meta-tag" id="today-tag"></span>
       <button class="icon-btn" id="btn-theme" aria-label="切换主题" title="切换深浅色主题">☾</button>
-      <span class="owner-tag"><span class="owner-dot"></span>Made by Caser</span>
+      <span class="owner-tag">
+        <span class="owner-dot"></span>Made by Caser
+      </span>
     </div>
   </header>
 
@@ -44,7 +51,12 @@
       <span><i style="background:var(--phase-tail)"></i>长尾</span>
       <span><i style="background:var(--ink)"></i>今日</span>
     </div>
-    <div class="gantt-dates"><div></div><div class="axis" id="gantt-axis"></div></div>
+
+    <div class="gantt-dates">
+      <div></div>
+      <div class="axis" id="gantt-axis"></div>
+    </div>
+
     <div class="gantt-wrap" id="gantt-body"></div>
   </section>
 
@@ -53,38 +65,65 @@
     <div class="kanban-toolbar">
       <div class="filter-row">
         <input type="search" id="f-search" placeholder="搜索任务标题">
-        <select id="f-game"><option value="">全部游戏</option></select>
-        <select id="f-channel"><option value="">全部渠道</option></select>
+        <select id="f-game">
+          <option value="">全部游戏</option>
+        </select>
+        <select id="f-channel">
+          <option value="">全部渠道</option>
+        </select>
       </div>
+
       <div class="filter-row">
         <button class="ghost" id="btn-export-tasks">导出 CSV</button>
         <button class="primary" id="btn-add-task">+ 新建任务</button>
       </div>
     </div>
-    <p style="font-size:12px; color:var(--ink-faint); margin:-6px 0 14px;">拖拽卡片可跨列更新任务状态。</p>
+
+    <p style="font-size:12px; color:var(--ink-faint); margin:-6px 0 14px;">
+      拖拽卡片可跨列更新任务状态。
+    </p>
+
     <div class="kanban" id="kanban-board"></div>
   </section>
 
   <!-- AIGC 资产库 -->
   <section class="panel" id="panel-assets">
     <div class="asset-toolbar">
-      <select id="f-asset-channel"><option value="">全部渠道</option></select>
+      <select id="f-asset-channel">
+        <option value="">全部渠道</option>
+      </select>
+
       <div class="filter-row">
         <span class="mono" id="asset-count" style="font-size:12px;"></span>
         <button class="ghost" id="btn-export-assets">导出 CSV</button>
       </div>
     </div>
+
     <div class="table-wrap">
       <table class="assets">
         <thead>
           <tr>
-            <th data-sort="name">素材 / Prompt Anchor<span class="arrow"></span></th>
-            <th data-sort="model">模型<span class="arrow"></span></th>
-            <th>Seed</th><th>CFG</th><th>调色 LUT</th><th>渠道</th>
-            <th data-sort="reuse">复用率<span class="arrow"></span></th>
+            <th data-sort="name">
+              素材 / Prompt Anchor<span class="arrow"></span>
+            </th>
+
+            <th data-sort="model">
+              模型<span class="arrow"></span>
+            </th>
+
+            <th>Seed</th>
+            <th>CFG</th>
+            <th>调色 LUT</th>
+            <th>渠道</th>
+
+            <th data-sort="reuse">
+              复用率<span class="arrow"></span>
+            </th>
+
             <th>绑定任务</th>
           </tr>
         </thead>
+
         <tbody id="asset-body"></tbody>
       </table>
     </div>
@@ -92,20 +131,30 @@
 
   <!-- 数据洞察 -->
   <section class="panel" id="panel-insights">
+
     <div class="insight-grid">
+
       <div class="insight-card">
         <h4>各产品内容任务分布</h4>
-        <div class="chart-box"><canvas id="chart-by-game"></canvas></div>
+        <div class="chart-box">
+          <canvas id="chart-by-game"></canvas>
+        </div>
       </div>
+
       <div class="insight-card">
         <h4>渠道分发占比</h4>
-        <div class="chart-box"><canvas id="chart-by-channel"></canvas></div>
+        <div class="chart-box">
+          <canvas id="chart-by-channel"></canvas>
+        </div>
       </div>
+
     </div>
+
     <div class="insight-card" style="margin-top:14px;">
       <h4>素材复用率排行</h4>
       <ul class="leaderboard" id="leaderboard"></ul>
     </div>
+
   </section>
 
   <footer class="note">
@@ -114,9 +163,15 @@
 
 </div>
 
-<div class="overlay" id="overlay"><div class="drawer" id="drawer"></div></div>
+<div class="overlay" id="overlay">
+  <div class="drawer" id="drawer"></div>
+</div>
 
+<!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-<script src="js/app.js"></script>
+
+<!-- JS 位于仓库根目录 -->
+<script src="app.js"></script>
+
 </body>
 </html>
