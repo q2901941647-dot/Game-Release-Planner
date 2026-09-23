@@ -1,139 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="description" content="GAME RELEASE PLANNER — 互动式游戏版本发行运营规划工具"/>
-<title>GAME RELEASE PLANNER · V9</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Release Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<div class="noise"></div>
-<div class="grid-bg"></div>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">OPS</div>
-      <div>
-        <strong>GAME RELEASE<br/>PLANNER</strong>
-        <small>INTERACTIVE OPS LAB · V9</small>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="brand-row">
+        <div class="brand-mark">GR</div>
+        <h1>Game Release Planner</h1>
+      </div>
+      <p class="sub">游戏内容排期与 AIGC 资产管理工具 </p>
+    </div>
+    <div class="header-actions">
+      <span class="meta-tag" id="today-tag"></span>
+      <button class="icon-btn" id="btn-theme" aria-label="切换主题" title="切换深浅色主题">☾</button>
+      <span class="owner-tag"><span class="owner-dot"></span>Made by Caser</span>
+    </div>
+  </header>
+
+  <div class="stats" id="stat-row"></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="gantt">节奏总览</button>
+    <button class="tab" data-tab="kanban">任务看板</button>
+    <button class="tab" data-tab="assets">AIGC 资产库</button>
+    <button class="tab" data-tab="insights">数据洞察</button>
+  </div>
+
+  <!-- 节奏总览 -->
+  <section class="panel active" id="panel-gantt">
+    <div class="gantt-legend">
+      <span><i style="background:var(--phase-warmup)"></i>预热</span>
+      <span><i style="background:var(--phase-burst)"></i>爆发</span>
+      <span><i style="background:var(--phase-tail)"></i>长尾</span>
+      <span><i style="background:var(--ink)"></i>今日</span>
+    </div>
+    <div class="gantt-dates"><div></div><div class="axis" id="gantt-axis"></div></div>
+    <div class="gantt-wrap" id="gantt-body"></div>
+  </section>
+
+  <!-- 任务看板 -->
+  <section class="panel" id="panel-kanban">
+    <div class="kanban-toolbar">
+      <div class="filter-row">
+        <input type="search" id="f-search" placeholder="搜索任务标题">
+        <select id="f-game"><option value="">全部游戏</option></select>
+        <select id="f-channel"><option value="">全部渠道</option></select>
+      </div>
+      <div class="filter-row">
+        <button class="ghost" id="btn-export-tasks">导出 CSV</button>
+        <button class="primary" id="btn-add-task">+ 新建任务</button>
       </div>
     </div>
-    <div class="side-live"><span class="dot"></span> LOCAL SIMULATION</div>
-    <nav id="pageNav" class="nav">
-      <button class="nav-item active" data-page="brief"><span>01</span><b>MISSION</b><small>配置版本任务</small></button>
-      <button class="nav-item" data-page="board"><span>02</span><b>CAMPAIGN BOARD</b><small>拖拽 7 日排期</small></button>
-      <button class="nav-item" data-page="mix"><span>03</span><b>MEDIA & CREATIVE</b><small>渠道与素材</small></button>
-      <button class="nav-item" data-page="qa"><span>04</span><b>QA / DATA</b><small>冲突与策略分</small></button>
-    </nav>
-    <div class="side-footer">
-      <div class="mini-status"><span>BUILD</span><b>OPS-V8</b></div>
-      <div class="mini-status"><span>MODE</span><b>LOCAL SIM</b></div>
-      <button id="resetAll" class="side-reset">RESET SESSION</button>
+    <p style="font-size:12px; color:var(--ink-faint); margin:-6px 0 14px;">拖拽卡片可跨列更新任务状态。</p>
+    <div class="kanban" id="kanban-board"></div>
+  </section>
+
+  <!-- AIGC 资产库 -->
+  <section class="panel" id="panel-assets">
+    <div class="asset-toolbar">
+      <select id="f-asset-channel"><option value="">全部渠道</option></select>
+      <div class="filter-row">
+        <span class="mono" id="asset-count" style="font-size:12px;"></span>
+        <button class="ghost" id="btn-export-assets">导出 CSV</button>
+      </div>
     </div>
-  </aside>
+    <div class="table-wrap">
+      <table class="assets">
+        <thead>
+          <tr>
+            <th data-sort="name">素材 / Prompt Anchor<span class="arrow"></span></th>
+            <th data-sort="model">模型<span class="arrow"></span></th>
+            <th>Seed</th><th>CFG</th><th>调色 LUT</th><th>渠道</th>
+            <th data-sort="reuse">复用率<span class="arrow"></span></th>
+            <th>绑定任务</th>
+          </tr>
+        </thead>
+        <tbody id="asset-body"></tbody>
+      </table>
+    </div>
+  </section>
 
-  <main class="content">
-    <header class="topbar">
-      <div class="crumb" id="crumb">MISSION / SETUP</div>
-      <div class="top-actions">
-        <span class="mono">SIMULATED DATA ONLY</span>
-        <button id="exportBtn" class="top-btn">EXPORT CSV</button>
+  <!-- 数据洞察 -->
+  <section class="panel" id="panel-insights">
+    <div class="insight-grid">
+      <div class="insight-card">
+        <h4>各产品内容任务分布</h4>
+        <div class="chart-box"><canvas id="chart-by-game"></canvas></div>
       </div>
-    </header>
+      <div class="insight-card">
+        <h4>渠道分发占比</h4>
+        <div class="chart-box"><canvas id="chart-by-channel"></canvas></div>
+      </div>
+    </div>
+    <div class="insight-card" style="margin-top:14px;">
+      <h4>素材复用率排行</h4>
+      <ul class="leaderboard" id="leaderboard"></ul>
+    </div>
+  </section>
 
-    <section id="page-brief" class="page active">
-      <div class="page-head">
-        <div>
-          <span class="eyebrow">01 / MISSION</span>
-          <h1>CAMPAIGN<br/><span>SETUP</span></h1>
-          <div class="head-metrics"><span>GAME / NODE</span><span>GOAL / AUDIENCE</span><span>RESOURCE CAP</span></div>
-        </div>
-        <div id="missionVisual" class="mission-visual"></div>
-      </div>
-      <div class="brief-layout">
-        <section class="panel setup-panel">
-          <div class="panel-head"><div><span>CONFIG</span><b>CAMPAIGN SETUP</b></div><span class="head-code">OPS-01</span></div>
-          <div class="setup-grid">
-            <div class="field wide"><label>GAME</label><div id="gamePicker" class="game-picker"></div></div>
-            <div class="field"><label>VERSION NODE</label><div id="nodePicker" class="stack"></div></div>
-            <div class="field"><label>PRIMARY GOAL</label><div id="goalPicker" class="chips"></div></div>
-            <div class="field wide"><label>TARGET AUDIENCE</label><div id="audiencePicker" class="chips audience-grid"></div></div>
-          </div>
-          <div class="resource-card">
-            <div class="resource-top"><span>MEDIA RESOURCE LEVEL</span><b id="resourceText">MEDIUM · 105R</b></div>
-            <input id="resourceRange" type="range" min="1" max="3" value="2"/>
-            <div class="range-labels"><span>LEAN / 70R</span><span>MEDIUM / 105R</span><span>FULL / 145R</span></div>
-            <div class="resource-bar"><i id="resourceBar"></i></div>
-            <div class="resource-meta"><span><b id="resourceUsed">0</b>R USED</span><span><b id="resourceCap">105</b>R CAP</span></div>
-          </div>
-          <div class="preset-row"><button data-preset="launch" class="preset active">LAUNCH</button><button data-preset="return" class="preset">RETURN</button><button data-preset="community" class="preset">COMMUNITY</button></div>
-          <button id="generateBtn" class="cta">GENERATE BASELINE <span>↗</span></button>
-        </section>
+  <footer class="note">
+    Demo 数据用于展示工具的信息架构与交互逻辑：解决游戏更新周期短、宣发物料多头并行导致的排期混乱，以及 AIGC 海量抽卡素材难以团队复用的问题。任务卡片支持拖拽改状态、点击查看绑定的 Prompt / Seed / CFG 元数据，看板与资产库均可导出 CSV。
+  </footer>
 
-        <aside class="panel mission-panel">
-          <div class="panel-head"><div><span>BRIEF</span><b>LIVE MISSION</b></div><span class="status-pill">READY</span></div>
-          <div class="mission-card">
-            <div class="mission-line"><span>GAME</span><b id="missionGame">王者荣耀</b></div>
-            <div class="mission-line"><span>NODE</span><b id="missionNode">新内容上线</b></div>
-            <div class="mission-line"><span>GOAL</span><b id="missionGoal">拉新</b></div>
-            <div class="mission-line"><span>AUDIENCE</span><b id="missionAudience">潜在新用户</b></div>
-          </div>
-          <div class="logic-mini">
-            <small>OPERATING LOGIC</small>
-            <div class="logic-chain"><span>认知</span><i>→</i><span>互动</span><i>→</i><span>转化</span><i>→</i><span>社区</span></div>
-          </div>
-          <div class="next-box"><small>NEXT STEP</small><b>进入 7 日作战桌面</b><button class="ghost next-page" data-page-target="board">OPEN BOARD ↗</button></div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="page-board" class="page">
-      <div class="page-head compact"><div><span class="eyebrow">02 / CAMPAIGN BOARD</span><h2>7-DAY EXECUTION</h2><div class="head-status"><span>DRAG / DROP</span><span>LIVE LOAD</span><span>RESOURCE</span></div></div><div class="page-score"><small>LIVE SCORE</small><strong id="scoreValue">—</strong><span id="scoreDelta">BASE</span></div></div>
-      <div class="board-toolbar panel">
-        <div class="toolbar-kpis" id="boardKpis"></div>
-        <div class="toolbar-actions"><button id="autoBalance" class="small-btn">AUTO BALANCE</button><button id="validateBtn" class="small-btn">RUN QA</button></div>
-      </div>
-      <div class="board-layout">
-        <section class="panel board-panel">
-          <div class="panel-head"><div><span>EXECUTION</span><b>7-DAY CAMPAIGN BOARD</b></div><span class="head-code">DRAG / DROP</span></div>
-          <div class="board-wrap" id="boardWrap">
-            <div class="board-head"><div class="asset-head">ASSET BANK</div><div>DAY 01</div><div>DAY 02</div><div>DAY 03</div><div>DAY 04</div><div>DAY 05</div><div>DAY 06</div><div>DAY 07</div></div>
-            <div id="board" class="board"></div>
-          </div>
-          <div class="board-tip"><span>INPUT</span> DROP / CLICK TO PLACE · CLICK A CARD TO INSPECT</div>
-        </section>
-        <aside class="panel live-panel"><div class="panel-head"><div><span>FEEDBACK</span><b>LIVE OPS</b></div><span class="status-pill accent">LIVE</span></div><div id="insightHero" class="insight-hero"></div><div class="score-block"><div class="score-ring" id="scoreRing"><strong id="ringValue">0</strong><span>/100</span></div><div><small>STRATEGY FIT</small><b id="scoreLabel">BUILD A PLAN</b><p id="scoreDesc">先生成基准排期，再拖拽调整。</p></div></div><div id="coverage" class="coverage"></div><div id="issueBox" class="issue-box"></div><div class="next-action"><small>NEXT ACTION</small><b id="nextAction">GENERATE BASELINE</b><span id="nextReason">系统将根据目标和资源生成初版节奏。</span></div></aside>
-      </div>
-    </section>
-
-    <section id="page-mix" class="page">
-      <div class="page-head compact"><div><span class="eyebrow">03 / MEDIA & CREATIVE</span><h2>MEDIA MIX</h2><div class="head-status"><span>CHANNELS</span><span>BUDGET</span><span>CREATIVE</span></div></div><div class="hero-stat"><small>ACTIVE GAME</small><b id="mixGameTitle">王者荣耀</b><span>VISUAL LIBRARY</span></div></div>
-      <div class="mix-grid">
-        <section class="panel channel-panel"><div class="panel-head"><div><span>MEDIA</span><b>CHANNEL MIX + BUDGET</b></div><span class="head-code">SELECT ≤ 4</span></div><div class="budget-top"><div><small>MEDIA BUDGET</small><strong id="channelBudgetUsed">70R / 70R</strong></div><input id="channelBudgetRange" type="range" min="30" max="120" step="5" value="70"/><span id="diversityValue">0%</span></div><div id="channelMix" class="channel-grid"></div><div class="mix-footer"><div class="meter"><i id="diversityBar"></i></div><div id="mixCopy">选择渠道，查看组合建议。</div></div></section>
-        <section class="panel creative-panel"><div class="panel-head"><div><span>ASSETS</span><b>CREATIVE ASSET DECK</b></div><span class="head-code">CLICK / PREVIEW</span></div><div id="creativeGrid" class="creative-grid"></div></section>
-      </div>
-      <div class="intel-panel panel"><div class="panel-head"><div><span>VISUAL INTEL</span><b>GAME CAMPAIGN REFERENCE</b></div><span id="intelSource" class="head-code"></span></div><div id="intelStrip" class="intel-strip"></div></div>
-    </section>
-
-    <section id="page-qa" class="page">
-      <div class="page-head compact"><div><span class="eyebrow">04 / QA & DATA</span><h2>PLAN QA</h2><div class="head-status"><span>GOAL FIT</span><span>CADENCE</span><span>RESOURCE</span><span>CHANNEL</span></div></div><div class="qa-score"><span>PLAN SCORE</span><strong id="qaScore">0</strong><small id="qaLabel">BUILD A PLAN</small></div></div>
-      <div class="qa-grid">
-        <section class="panel qa-panel"><div class="panel-head"><div><span>01</span><b>STRATEGY COMPONENTS</b></div><span class="head-code">LIVE</span></div><div id="componentBars" class="component-bars"></div><div class="qa-note">评分为模拟规则，用于演示如何把运营目标拆成可量化的结构指标。</div></section>
-        <section class="panel qa-panel"><div class="panel-head"><div><span>02</span><b>CONFLICT MONITOR</b></div><span class="head-code">AUTO QA</span></div><div id="qaIssues" class="qa-issues"></div></section>
-        <section class="panel qa-panel full"><div class="panel-head"><div><span>03</span><b>CAMPAIGN LOAD BY DAY</b></div><span class="head-code">7 DAYS</span></div><div id="loadChart" class="load-chart"></div></section>
-        <section class="panel qa-panel full"><div class="panel-head"><div><span>04</span><b>OPERATION SUMMARY</b></div><span class="head-code">GENERATED</span></div><div class="summary-grid" id="summaryGrid"></div></section>
-      </div>
-    </section>
-
-    <footer>GAME RELEASE PLANNER · V9 · INDEPENDENT INTERACTIVE DEMO · SIMULATED METRICS ONLY · GAME VISUALS ARE PUBLIC REFERENCE MATERIAL</footer>
-  </main>
 </div>
-<div id="modal" class="modal hidden"><div class="modal-card"><button id="modalClose" class="modal-close">×</button><div id="modalBody"></div></div></div>
-<div id="toast" class="toast"></div>
-<script src="app.js"></script>
+
+<div class="overlay" id="overlay"><div class="drawer" id="drawer"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
